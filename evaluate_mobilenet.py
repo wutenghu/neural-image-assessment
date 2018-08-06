@@ -53,24 +53,27 @@ with tf.device('/CPU:0'):
 
     score_list = []
 
+    my_file = open('mobilenet_score.txt', 'w+')
     for img_path in imgs:
-        img = load_img(img_path, target_size=target_size)
-        x = img_to_array(img)
-        x = np.expand_dims(x, axis=0)
 
-        x = preprocess_input(x)
+        try:
+            img = load_img(img_path, target_size=target_size)
+            x = img_to_array(img)
+            x = np.expand_dims(x, axis=0)
 
-        scores = model.predict(x, batch_size=1, verbose=0)[0]
+            x = preprocess_input(x)
 
-        mean = mean_score(scores)
-        std = std_score(scores)
+            scores = model.predict(x, batch_size=1, verbose=0)[0]
 
-        file_name = Path(img_path).name.lower()
-        score_list.append((file_name, mean))
+            mean = mean_score(scores)
+            std = std_score(scores)
 
-        print("Evaluating : ", img_path)
-        print("NIMA Score : %0.3f +- (%0.3f)" % (mean, std))
-        print()
+            file_name = Path(img_path).name.lower()
+            score_list.append((file_name, mean))
+
+            print(img_path.split("/")[3].split(".")[0]+"|"+str(mean)+"|"+str(std))
+        except Exception as e:
+            continue
 
     if rank_images:
         print("*" * 40, "Ranking Images", "*" * 40)
